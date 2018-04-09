@@ -1,0 +1,188 @@
+\documentclass[pageno]{jpaper}
+
+\newcommand{\IWreport}{2018}
+\newcommand{\quotes}[1]{``#1''}
+
+
+\widowpenalty=9999
+
+\usepackage[normalem]{ulem}
+\usepackage{scrextend}	% for the indented environment
+\usepackage{amsmath}
+\usepackage{graphicx, caption, subcaption}
+
+\newenvironment{indented}{\begin{addmargin*}{1.5cm}}{\end{addmargin*}}
+
+\begin{document}
+
+\title{Leader-Follower Interactions in Multi-individual Decision-Making Networks}
+
+\author{Cathy Chen\\Adviser: Dr. Zahra Aminizare}
+
+\date{}
+\maketitle
+\begin{abstract}
+\end{abstract}
+\tableofcontents
+\pagebreak
+
+\thispagestyle{empty}
+%\doublespacing
+
+\section{Introduction}
+When groups make decisions, each individual often influence and are influenced by other individuals. These influences might rely heavily on group dynamics and structure: certain individuals can hold disproportionate amounts of influence on other individuals, and might be able to influence a limited subset of other individuals. The connections between individuals in a network, and the information available to each individual in a network, can affect decisions made both by individuals and by the group as a whole. By better understanding characteristics of these influence networks and the individual individuals they contain, we gain insight into the nature of decision-making networks.
+
+We can use these networks to model decisions made by humans in social networks, and to understand how the placement of heterogeneously influential and knowledgeable individuals affect a consensus made by the group. Furthermore, we can apply these networks to understand the synchronization of coupled oscillators, the behavior of mobile sensor networks, and multivehicle systems \cite{olfati-saber_consensus_2007}.
+
+The goal of this project is to create an in-depth, empirical analysis of interactions between networks of decision-makers. We build and simulate decision-making in networks with different structures, containing both homogeneous and heterogeneous individual types. We aim to understand how these parameters affect individual individuals' decision-making time, time for the group to reach a consensus, and decisions outcomes.
+
+\section{Background}
+\subsection{Drift Diffusion Model}
+In this project we investigate decision-making under the two alternative choice task. In this scenario each individual decides between two choices. In this task, there are two paradigms. Under the ``interrogation" paradigm, the individual is required to make a decision after a set amount of time. Under the ``free response" paradigm, the individual chooses when to make their decision.
+
+To decide between two choices each individual might gather information about the situation, making a decision when they accumulate a sufficient amount of information or are forced to choose. In drift diffusion process, the individual accumulates information according to
+\begin{align}
+dx=\beta dt+\sigma dW
+\end{align}
+where $x$ represents the individual's accumulated information, $\beta$ represents the correct choice ($\beta$ is positive for one choice, and negative for the other), and $\sigma dW$ represents Gaussian noise with variance $\sigma^2dt$. In the interrogation paradigm, the individual makes the choice corresponding to the sign of their accumulated information at the time of interrogation. In the free response paradigm, the individual makes a choice once their accumulated evidence reaches some fixed threshold $\theta$ \cite{bogacz_physics_2006}.
+
+In Figure \ref{fig:DDM_demo} we show an example of accumulating evidence in a noisy situation, with $\beta=1$, $\sigma=0.1$, and $dt=0$. The presence of noise causes the individual to sometimes make an incorrect decision.
+
+\begin{figure}[ht]
+\centering
+	\includegraphics[scale=0.5]{../Figures/DDM_demo.png}
+\caption{DDM Demonstration}
+\label{fig:DDM_demo}
+\end{figure}
+
+We also consider a noise-free model, where the individual accumulates information according to
+\begin{align}
+dx=\beta dt
+\end{align}
+
+Researchers have observed this process in the brains of monkeys. In their experiments monkeys view a set of randomly moving dots, some proportion of which are fixed to move coherently in the same direction. The monkeys are trained to determine the direction of coherence, and researchers have found brain regions whose behavior mirrors the process modeled by the drift diffusion process when the monkeys complete this task \cite{shadlen_neural_2001}.
+
+\subsection{Decision-Making in Groups}
+Previous researchers have theorized about models of group decision-making. They proposed a process of building consensus among of group of individuals, each of whom has individual opinions and might modify their opinion states after learning of other individuals' opinions \cite{degroot_reaching_1974}. They model these interactions using Laplacians flow, where the decision-making network is modeled as a graph with individuals as nodes and influence as edges, and influence between individuals depends on the graph Laplacian $L$ of the network, defined as
+\begin{align}
+L_{ij}=
+\begin{cases} 
+  deg(v_i) & i=j \\
+  -\alpha_{ij} & i\neq j
+\end{cases}
+\end{align}
+where $\alpha_{ij}$ is the amount of influence node $j$ exerts on node $i$
+\cite{olfati-saber_consensus_2007}.
+
+As in Srivastava and Leonard, we model a network of decision-makers as coupled drift diffusion processes \cite{srivastava_collective_2014}.
+\begin{align}
+d\mathbf{x}(t)=(\mathbf{\beta}-\mathbf{Lx}(t))dt+\sigma\mathbf{I_n}d\mathbf{W_n}(t)\\
+\mathbf{x}(0)=\mathbf{x}_0
+\end{align}
+
+We allow $\beta_i$ to vary across different node, which results in homogeneous and heterogeneous networks.
+
+In homogeneous networks, each individual has the same $\beta$. In heterogeneous networks, individuals accumulate information from different sources and therefore have $\beta$ with different signs and magnitudes. In leader-follower networks, only some of the individuals (leaders) have access to external information ($\beta\neq0$) while other individuals (followers) only receive information from other individuals' communication ($\beta=0$).
+
+\subsection{Related Work}
+Previous work has analyzed various characteristics of group decision-making under various scenarios.
+
+Ofati-Saber et al define ``consensus" as the asymptotic agreement between all nodes ($x^*=\alpha\mathbf{1_n}$). They consider interactions between individuals who may have different initial opinions $x_i(0)$ but who do not accumulate additional information or noise. In other words, they use a version of $(4)$ where $\mathbf{\beta}=\mathbf{0}$ and $\sigma=0$. They find that the refusal of certain groups to share information or to change their state based on others' states can prevent a group from reaching consensus \cite{olfati-saber_consensus_2007}. We use the same definition of consensus, and analyze the effect of different $\mathbf{\beta}$ and $\sigma$ on the ability of a group to reach consensus.
+
+Poulakakis, Scardovi, and Leonard analyze a network of interacting drift-diffusion processes and analyze the effect of an individual's location on their variance, finding a measure of variance that depends on the node's communication topology \cite{poulakakis_node_2012}. They apply this metric to specific graph structures, showing how certainty changes with node location and the number of total nodes \cite{poulakakis_node_2012-1}. Srivastava and Leonard look at the same model, creating a de-coupled approximation to the coupled model and analyzing the effect of a node's location on its error rate \cite{srivastava_collective_2014}. Both groups analyze homogeneous networks -- in terms of $(4)$, they consider the case where $\mathbf{\beta}=\beta\mathbf{1_n}$. We also look to networks of drift-diffusion processes, and specifically analyze the effect of a node's location. We further consider cases of leader-follower networks, in which $\beta_i$ is allowed to vary for each node $i$.
+
+Fitch and Leonard study the problem of selecting a set of leaders that minimize overall variance of a network's nodes, where the leaders are a subset of nodes that receive the same external signal while the other nodes do not directly measure the external signal. They find a metric to determine the optimal set of leaders, and observe a trade-off between information centrality and graph coverage \cite{fitch_joint_2016}. We also look at the problem of selecting leaders among a network of leaders and followers, looking at the cases of specific communication topologies. In addition, we examine the effect of leaders who receive different signals.
+
+\subsection{Approach}
+We construct decision-making networks with different agent and interaction characteristics. We simulate their decision making process under the drift-diffusion model, and look at resulting individual and group decisions under the free response protocol.
+% TODO: RE-FRAME IN TERMS OF PROJECT GOALS.
+
+\subsection{Population Models}
+%In each of our models, we consider individuals with the same threshold $\theta$ for positive and negative decisions. Furthermore, we consider equally weighted interactions -- the strength of information flow between any two connected individuals is constant across connections.
+%
+%After reaching this threshold, individuals continue to integrate information. When all individuals have reached the same threshold, we say that the group has reached a consensus.
+
+We consider three types of populations:
+\begin{enumerate}
+\item Homogeneous populations, in which all individual share the same $\beta$.
+\item Populations with one leader (who has $\beta\neq0$) and multiple followers (who have $\beta=0$).
+\item Populations with two leaders (denoted $l_1$ and $l_2$). We consider cases in which the two leaders share the same source of information ($\beta_{l_1}=\beta_{l_2}$), and when they share differing sources of information ($\beta_{l_1}\neq\beta_{l_2}$) and multiple followers (denoted $f_i$, each with $\beta_{f_i}=0$).
+\end{enumerate}
+
+\subsection{Network Models}
+We further consider four types of networks:
+\begin{enumerate}
+\item A circle graph in which each node is connected two its two neighbors (\ref{fig:graphdrawing_circle})
+\item Fully connected graph (\ref{fig:graphdrawing_full})
+\item The graph used by Srivastava and Leonard \cite{srivastava_collective_2014} (\ref{fig:graphdrawing_paper})
+\item An Erd\"{o}s-R\`{e}yni random graph (\ref{fig:graphdrawing_random})
+\end{enumerate}
+\begin{figure}[!htb]
+\begin{subfigure}[b]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/graphdrawing_circle.png}
+      \caption{Circle Graph}\label{fig:graphdrawing_circle}
+\end{subfigure}
+\begin{subfigure}[b]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/graphdrawing_full.png}
+      \caption{Fully Connected Graph}\label{fig:graphdrawing_full}
+\end{subfigure}
+\begin{subfigure}[b]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/graphdrawing_paper.png}
+      \caption{Paper Graph}\label{fig:graphdrawing_paper}
+\end{subfigure}
+\begin{subfigure}[b]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/graphdrawing_random.png}
+      \caption{Example Random Graph}\label{fig:graphdrawing_random}
+\end{subfigure}
+\caption{Graph Structures}
+\end{figure}
+\subsection{Implementation Specifics}
+In each of our simulations, (with the exception of the graph used in \cite{srivastava_collective_2014}) we build models with $10$ total individuals. The graph used in \cite{srivastava_collective_2014} contains nine nodes. We use $|\beta|=1$, $dt=0.001$. We consider noise-free scenarios ($\sigma=0$) as well as networks with noise ($\sigma>0$)
+
+\section{Results}
+\subsection{Constant Total Accumulation}
+We consider communication networks as undirected graphs. If individual $j$ exerts an influence $\alpha_{ij}$ on individual $i$, then $i$ influences $j$ by the same amount: $\alpha_{ij}=\alpha_{ji}$. Because of this symmetry, in noise-free networks the total amount of accumulation in the network depends only on the signal $\mathbf{\beta}$ measured by leaders in the network. We present the following proof:
+For a network with $n$ individuals, we can rewrite
+\begin{align*}
+d\mathbf{x}(t)=(\mathbf{\beta}-\mathbf{Lx}(t))dt+\sigma\mathbf{I_n}d\mathbf{W_n}(t)
+\end{align*}
+as
+\begin{align*}
+dx_i(t)=(\beta_i-\sum\limits_{j=1}^nL_{ij}x_j(t))dt
+\end{align*}
+Since $L_{ii}=-\sum\limits_{j\neq i}\alpha_{ij}$ and $L_{ij}=-\alpha_{ij}$ for $i\neq j$, we can write this as
+\begin{align*}
+dx_i(t)=(\beta_i+\sum\limits_{j\neq i}\alpha_{ij}(x_j(t)-x_i(t)))dt
+\end{align*}
+Then we have the total accumulation
+\begin{align*}
+\sum\limits_{i=1}^ndx_i(t)=\sum\limits_{i=1}^n(\beta_i+\sum\limits_{j\neq i}\alpha_{ij}(x_j(t)-x_i(t)))dt\\
+=(\sum\limits_{i=1}^n\beta_i+\sum\limits_{i=1}^n\sum\limits_{j\neq i}\alpha_{ij}(x_j(t)-x_i(t)))dt\\
+=\sum\limits_{i=1}^n\beta_idt
+\end{align*}
+where we have the final equality from the symmetry of influence $\alpha_{ij}=\alpha_{ji}$.
+
+As a consequence, there is a trade-off between how much an individual influences other nodes' accumulation of information and how quickly the individual accumulates information themself. For instance a more centrally located leader causes follower nodes to accumulate information more quickly, but this comes at the cost of the leader's own accumulation of information. We see this in the case of a single-leader population in the communication network used by Srivastava and Leonard. As the leader moves to less central areas in the network, it accumulates its own information  more quickly at the cost of the followers accumulating information more slowly.
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/papergraph_1.png}
+\end{subfigure}
+\begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/papergraph_5.png}
+\end{subfigure}
+\begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{../Figures/papergraph_9.png}
+\end{subfigure}
+\caption{Paper graph simulations, one leader.}\label{fig:sim_paper_oneleader}
+\end{figure}
+\bstctlcite{bstctl:etal, bstctl:nodash, bstctl:simpurl}
+\bibliographystyle{IEEEtranS}
+\bibliography{references}
+
+\section{Appendix}\label{appendix}
+%- github repo
+%- github forks used
+
+\end{document}
+

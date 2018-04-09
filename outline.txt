@@ -1,0 +1,9 @@
+- Explain Valiant model
+- why PJOIN needed, why PJOIN works
+- Relate both models to literature in neuroscience
+
+- they work with disjoint framework. we try to extend to overlapping framework.
+
+- simulate algorithm. with disjoint and overlapping frameworks.
+
+- cortical computation.
