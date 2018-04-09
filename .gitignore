@@ -1,1 +1,7 @@
-Readings/*
+# latex stuff.
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.gz
