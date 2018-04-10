@@ -1,31 +1,7 @@
-Cortical Learning Algorithms
-COS 511 Project Proposal
-Cathy Chen and Stefan Keselj
+Cathy Chen (cc27) and Stefan Keselj (skeselj)
 
-We will analyze the neuroidal model, a biologically plausible computational
-model proposed by Leslie Valiant in 1994. The model consists of a set of
-neurons connected to eachother by directional synapses to form a DAG. When
-stimuli are given to the lowest members of the DAG (topologically), they
-are carried by the synapses to other neurons, which also fire if the sum
-of their incoming stimuli passes a threshold. Ideally, the highest members
-of the DAG will mean something. For example, people have managed to do
-supervised learning of classification using this model. If this sounds
-similar to the neural nets that are so popular now it's because it is. This
-model is the same as a vanilla feedfoward network except for a crucial
-difference in character: this model is more discrete and flexible. This
-makes the model more interesting to biologists because it's more realistic,
-less interesting to engineers because it's less practical, and interesting
-to us theorists because it will be easier to analyze than a vanilla net.
-In this model we are thinking about sparse 1's and 0's, but in the
-mainstream model we would have to deal with dense continuous values. It
-is our hope that we will be able to apply some of the tools from this
-class to this setting. Specifically, we would like to see what can be
-said about the hypothesis classes of different flavors of neuroidal models.
-(seems relatively straightforward using our theorems surrounding VC-dim
-and rademacher complexity) and if any guarantees could be given about
-learning (seems relatively hard, but perhaps we could dumb the model down
-enough to say something). This would be useful because it would give
-people a ballpark idea about the representational power and learning
-capabilities of this networks. If these are bad, we will know to look
-for other models. If they are promising, people building neural nets
-might be able to use our analysis as a guide.
+Our project will focus on the neuroidal model, a biologically plausible computational model proposed by Leslie Valiant in 1994 [2]. The model consists of a set of computational units connected to eachother by directional synapses to form a DAG. Researchers have managed to perform supervised learning of classification using this model. We hope to apply some of the tools from this class to understanding this model. We will begin by studying the model itself and by comparing the mechanisms of the neuroidal model with hypotheses from the field of neuroscience about mechanisms of the human brain. We will then turn to algorithms implemented on this model, particularly those proposed by Valiant in 2005 [3] and Papadimitriou in 2015 [1]. In this phase of the project we seek to understand the theoretical performance of these algorithms (in terms of both computational complexity and learning ability). In our write-up, we will present a concise overview of the model, connections to neuroscience literature, and a comparison of Valiant's and Papadimitriou's algorithms. As a possible extension to our project, we can implement the algorithms proposed by Valiant and Papadimitriou and test their empirical performance on learning tasks described in the papers. We can also try to extend Papadimitriou's simulations and/or analysis to learning overlapping (in addition to disjoint) representations. Papadimitriou and Vampala provide proofs for disjoint representations of items; we hope to extend their proof to overlapping items. For either extension, we can also include the results of our simulations, access to our implementations, and any insights gained from attempting to extend previous work to overlapping items.
+
+[1] C. H. Papadimitriou and S. S. Vempala, "Cortical Learning via Prediction", JMLR: Workshop and Conference Proceedings, vol. 40, p. 21, 2015.
+[2] L. G. Valiant, Circuits of the Mind. New York, NY, USA: Oxford University Press, Inc., 1994.
+[3] --, "Memorization and association on a realistic neural model", Neural Computation, vol. 17, no. 3, pp. 527-555, Mar. 2005.
