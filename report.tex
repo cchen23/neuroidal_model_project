@@ -1,0 +1,72 @@
+\documentclass[letterpaper, 12pt]{article}
+
+\usepackage[normalem]{ulem}
+\usepackage{scrextend}	% for the indented environment
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{graphicx, caption, subcaption}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\begin{document}
+%Header-Make sure you update this information!!!!
+\noindent
+\textbf{Study and Comparison of the Neuroidal Model} \hfill \newline Cathy Chen and Stefan Keselj \\
+COS511 Final Project Report \\
+Due May 15, 2018
+
+\section*{Introduction}
+We studied the neuroidal model, a biologically plausible model of learning proposed by Valiant in 1994 \cite{valiant_circuits_1994}. 
+
+In this report we present a concise summary of the model and abilities, based on Valiant's original book and subsequent work. We then study an extension proposed by Papadimitriou and Vempala, and describe the benefits of this extension \cite{papadimitriou_cortical_2015}. We select a few algorithms from these works to implement, and compare mechanisms of the neuroidal model to hypotheses about the human brain and to modern artificial neural networks.
+
+\section*{Neuroidal Model}
+In this section we summarize our understanding of the neuroidal model. Our understanding primarily draws from \cite{valiant_circuits_1994, valiant_memorization_2005, papadimitriou_cortical_2015}.
+
+\subsection*{Model Summary}
+The neuroidal model consists of a system of \underline{neurons} and \underline{synapses} which can be modeled as a weighted directed graph in which nodes represent neurons and edges represent synapses. Each neuron $i$ has a state $s_i$ containing three variables: a threshold $T\in\mathbb{R}_{>0}$, a categorical memory variable $q$, and an indicator variable $f$ that says whether the network is firing at that timestep. (In more complex versions of the model, $T\in\mathbb{R}^\gamma$, for $\gamma\in\mathbb{Z}$, which allows each neuron to store more information.) The synapse from neuron $i$ to neuron $j$ is represented by $w_{ji}\in W$, where $W$ may be a set such as $\mathbb{R}$ or $\{0,1\}$.
+
+The system operates with discrete timesteps and all neuroid and synapse states update at each timestep according to predefined functions. This model uses \underline{vicinal} algorithms, meaning that these predefined functions are local: each neuron's update depends only on its own state, the firing of adjacent neurons, and the weights connecting the neuron and its neighbors. More specifically, the functions have the form $s_{i,t+1}=\delta(s_{i,t},w_i)$, $w_{ji,t+1}=\lambda(s_i,w_i,w_{ji},f_j)$, where $w_i$ is the sum over all $w_{ki}$ for all firing neurons $k$.
+
+- bounds
+\subsection*{Motivation}
+- biologically plausible -> way to study the human brain
+
+
+\section{Extension by Papadimitriou and Vempala}
+Papadimitriou and Vempala \cite{papadimitriou_cortical_2015} extend Valiant's work, adding an additional PJOIN operation.
+- motivation for operation
+- concise description of PJOIN
+- bounds?
+
+\section{Implementation}
+We choose to focus on the JOIN and LINK functions, and implement the algorithms specified in \cite{valiant_memorization_2005}.
+- link to code
+- simulations
+- compare to bounds?
+
+- also PJOIN
+
+\section{Comparison to Human Brains}
+Valiant's original model respects constraints posed by the human brain, such as the sparsity of connections and speed of processing in the human brain, and his comparison to experimental data from a biological system validates the biological plausibility of the neuroidal model \cite{valiant_quantitative_2006}. In this section we compare in more detail the neuroidal model and current hypotheses about learning in the human brain, particularly with respect to memory.
+
+- neurons/synapses/updates
+- memory (esp associative memory)
+- learning and execution
+- grandmother neurons
+- mot: working with constraints
+
+\section{Comparison to Neural Networks}
+The neuroidal model shares many structural similarities with neural networks, yet recent literature surrounding this model has been much sparser than than that of neural networks. In this section we compare structural and functional facets of the two models.
+
+- similarities in structure
+- differences in structure
+- benefits
+- detriments
+
+\section{Conclusion}
+- neuroidal model pros and cons (in comparison to modern NNs, for human brain).
+- what makes neuroidal model more difficult to work with (explicitly programmed, slower)
+
+\bibliographystyle{IEEEtranS}
+\bibliography{COS511}
+
+\end{document}
