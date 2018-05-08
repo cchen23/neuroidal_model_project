@@ -1,9 +1,16 @@
 - Explain Valiant model
-- why PJOIN needed, why PJOIN works
+  - Overview of model
+  - Connections to neuroscience ("grandmother" cells, biological constraints, associative memory (hippcampus sparsity? cortex catastrophic interference?)
+    - With weak synapses (Valiant 2005, Neural Computation)
+    - Comparison to actual neural data (ie plausible) (Valiant 2006, Biological Cybernetics)
+  - Compare/contrast with current neural networks
+  - Shown to solve certain algorithsm (see Circuits of the Mind book)
+  - Specifics of LINK and JOIN algorithms (Papadimitriou & Vempala Appendix A)
+
+- Explain Papadimitrou/Vempala PJOIN
+  - why PJOIN needed, why PJOIN works
+
 - Relate both models to literature in neuroscience
 
-- they work with disjoint framework. we try to extend to overlapping framework.
-
 - simulate algorithm. with disjoint and overlapping frameworks.
-
-- cortical computation.
+- they work with disjoint framework. we try to extend to overlapping framework.
