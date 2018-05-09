@@ -6,6 +6,20 @@
 \usepackage{graphicx, caption, subcaption}
 \usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
 
+% make everything 12pt font
+\let\Huge\normalsize
+\let\huge\normalsize
+\let\LARGE\normalsize
+\let\Large\normalsize
+\let\large\normalsize
+\let\small\normalsize
+\let\footnotesize\normalsize
+\let\scriptsize\normalsize
+\let\tiny\normalsize
+
+% Make everything single spacing
+\linespread{1.0}
+
 \begin{document}
 %Header-Make sure you update this information!!!!
 \noindent
@@ -13,38 +27,38 @@
 COS511 Final Project Report \\
 Due May 15, 2018
 
-\section*{Introduction}
+\section{Introduction}
 We studied the neuroidal model, a biologically plausible model of learning proposed by Valiant in 1994 \cite{valiant_circuits_1994}. In this report we present a concise summary of the model and abilities, based on Valiant's original book and subsequent work. We then study an extension proposed by Papadimitriou and Vempala, and describe the benefits of this extension \cite{papadimitriou_cortical_2015}. We select a few algorithms from these works to implement, and compare mechanisms of the neuroidal model to hypotheses about the human brain and to modern artificial neural networks.
 
-\section{Neuroidal Model}
+\section{Neuroidal Model}\label{sec:model}
 In this section we summarize our understanding of the neuroidal model. Our understanding primarily draws from \cite{valiant_circuits_1994, valiant_memorization_2005, papadimitriou_cortical_2015}.
 
-\subsection{Model Summary}
 The neuroidal model consists of a system of \underline{neurons} and \underline{synapses} which can be modeled as a weighted directed graph in which nodes represent neurons and edges represent synapses. Each neuron $i$ has a state $s_i$ containing three variables: a threshold $T\in\mathbb{R}_{>0}$, a categorical memory variable $q$, and an indicator variable $f$ that says whether the network is firing at that timestep. (In more complex versions of the model, $T\in\mathbb{R}^\gamma$, for $\gamma\in\mathbb{Z}$, which allows each neuron to store more information.) The synapse from neuron $i$ to neuron $j$ is represented by $w_{ji}\in W$, where $W$ may be a set such as $\mathbb{R}$ or $\{0,1\}$. In some versions of the model, each synapse also contains a memory state $qq$.
 
 The system operates with discrete timesteps and all neuroid and synapse states update at each timestep according to predefined functions. This model uses \underline{vicinal} algorithms, meaning that these predefined functions are local: each neuron's update depends only on its own state, the firing of adjacent neurons, and the weights connecting the neuron and its neighbors. More specifically, the functions have the form $s_{i,t+1}=\delta(s_{i,t},w_i)$, $w_{ji,t+1}=\lambda(s_i,w_i,w_{ji},f_j)$, where $w_i$ is the sum over all $w_{ki}$ for all firing neurons $k$.
 
-\subsection{Model Analysis}
-- things shown to solve\\
-- bounds\\
-\subsection*{Motivation}
-- biologically plausible: way to study the human brain
+Each conceptual ``item" is represented by a group of $r$ neurons. The firing of an item's neurons denotes that the activation of the item (in terms of cognition, this means the system is ``thinking about" this item).
 
+In \cite{valiant_circuits_1994} Valiant describes four modes of learning that result from two dichotomies: one between memorization () and inductive learning (), and the other between supervised () and unsupervised () learning. He describes algorithms that perform all four modes of learning with the neuroidal model. 
 
-\section{Extension by Papadimitriou and Vempala}
-Papadimitriou and Vempala \cite{papadimitriou_cortical_2015} extend Valiant's work, adding an additional PJOIN operation.
-- motivation for operation\\
-- concise description of PJOIN\\
-- bounds?\\
+- TODO: MORE INFO ABOUT ALGORITHMS FOR FOUR MODES. PAC LEARNING FOR INDUCTIVE LEARNING\\
+- JOIN: FORMING BOOLEAN CONJUNCTIONS OF ATTRIBUTES (UNSUPERVISED MEM); LINK (SUPERVISED MEM); LEARNING FUNCTIONS (SUPERVISED INDUCTIVE MEM); CORRELATIONAL LEARNING (UNSUPERVISED INDUCTIVE MEM);
 
-\section{Implementation}
-We choose to focus on the JOIN and LINK functions, and implement the algorithms specified in \cite{valiant_memorization_2005}.
+\section{Selected Algorithms}\label{sec:selected_algorithms}
+Our study focused on the JOIN and LINK algorithms, which respectively implement unsupervised and supervised memorization (in terms of Valiant's dichotomies) and forming memories and associations (in terms of cognitive functions) \cite{valiant_circuits_1994, papadimitriou_cortical_2015}. In this section, we TODO:DESCRIBE ANALYSES, TODO:OUR IMPLEMENTATION of these functions, and an extension of Valiant's work the proposed a new function.
+
+We implement the algorithms according to specifics described in \cite{valiant_memorization_2005}.
 - ASSUME BIPARTITE GRAPHS (p550)\\
 - link to code\\
 - simulations\\
 - compare to bounds?\\
+- bounds\\
 
-- also PJOIN
+\subsection{Extension by Papadimitriou and Vempala}\label{sec:pjoin}
+Papadimitriou and Vempala \cite{papadimitriou_cortical_2015} extend Valiant's work, adding an additional PJOIN operation.
+- motivation for operation\\
+- concise description of PJOIN\\
+- bounds?\\
 
 \section{Comparison to Human Brains}
 Valiant's original model respects constraints posed by the human brain, such as the sparsity of connections and speed of processing in the human brain, and his comparison to experimental data from a biological system validates the biological plausibility of the neuroidal model \cite{valiant_quantitative_2006}. In this section we compare in more detail the neuroidal model and current hypotheses about learning in the human brain, particularly with respect to memory.
@@ -71,8 +85,13 @@ The neuroidal model shares many structural similarities with neural networks, ye
 	- hard to use as a black box; need explicit algorithms\\
 
 \section{Conclusion}
-- neuroidal model pros and cons (in comparison to modern NNs, for human brain).\\
-- what makes neuroidal model more difficult to work with (explicitly programmed, slower)\\
+Rather than perform neurobiological studies or behavioral experiments, Valiant proposes a computational approach of building a system that performs the desired behavior using components inspired by biology \cite{valiant_circuits_1994}. With this approach, the neuroidal model differs from work with the brain and artificial neural networks.
+
+Unlike studies of the brain that start from specific analyses of biological components, this approach uses computational constraints to limit the space of algorithms, and finds algorithms within this space that accomplishes desired functions.
+
+Unlike artificial neural networks which learn algorithms that are generally hard to interpret, the neuroidal model requires designing ``explicit computational mechanisms" for ``explicitly defined and possibly multiple cognitive tasks"; the need for designing \textit{explicit} mechanisms and tasks makes the neuroidal model perhaps less useful (at least at its current state) for generally solving problems, a use for which artificial neural networks have received much attention in the past few years.
+
+Though this provides a disadvantage in terms of engineering solutions to large-scale problems, the explicit nature of the neuroidal model serves as an advantage for forming scientific hypotheses about learning. The explicit structure of the model and algorithms make the neuroidal model amenable to analyses of system parameters and capacity bounds that we mention in Section \ref{sec:model}, and the explicit nature of algorithms that we describe and implement in Section \ref{sec:selected_algorithms} allows us to more directly map the capabilities of the neuroidal model to hypotheses about how learning occurs in the human brain.
 
 \bibliographystyle{IEEEtranS}
 \bibliography{COS511}
