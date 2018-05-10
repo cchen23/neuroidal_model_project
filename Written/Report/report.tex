@@ -35,21 +35,27 @@ In this section we summarize our understanding of the neuroidal model. Our under
 
 The neuroidal model consists of a system of \underline{neurons} and \underline{synapses} which can be modeled as a weighted directed graph in which nodes represent neurons and edges represent synapses. Each neuron $i$ has a state $s_i$ containing three variables: a threshold $T\in\mathbb{R}_{>0}$, a categorical memory variable $q$, and an indicator variable $f$ that says whether the network is firing at that timestep. (In more complex versions of the model, $T\in\mathbb{R}^\gamma$, for $\gamma\in\mathbb{Z}$, which allows each neuron to store more information.) The synapse from neuron $i$ to neuron $j$ is represented by $w_{ji}\in W$, where $W$ may be a set such as $\mathbb{R}$ or $\{0,1\}$. In some versions of the model, each synapse also contains a memory state $qq$.
 
-The system operates with discrete timesteps and all neuroid and synapse states update at each timestep according to predefined functions. This model uses \underline{vicinal} algorithms, meaning that these predefined functions are local: each neuron's update depends only on its own state, the firing of adjacent neurons, and the weights connecting the neuron and its neighbors. More specifically, the functions have the form $s_{i,t+1}=\delta(s_{i,t},w_i)$, $w_{ji,t+1}=\lambda(s_i,w_i,w_{ji},f_j)$, where $w_i$ is the sum over all $w_{ki}$ for all firing neurons $k$.
+Each conceptual ``item" is represented by a group of $r$ neurons. The firing of an item's neurons denotes that the activation of the item (in terms of cognition, this means the system is ``thinking about" this item). 
 
-Each conceptual ``item" is represented by a group of $r$ neurons. The firing of an item's neurons denotes that the activation of the item (in terms of cognition, this means the system is ``thinking about" this item).
+The system operates with discrete timesteps and all neuroid and synapse states update at each timestep according to predefined functions. This model uses \underline{vicinal} algorithms, meaning that these predefined functions are local: each neuron's update depends only on its own state, the firing of adjacent neurons, and the weights connecting the neuron and its neighbors. The functions have the form $s_{i,t+1}=\delta(s_{i,t},w_i)$, $w_{ji,t+1}=\lambda(s_i,w_i,w_{ji},f_j)$, where $w_i$ is the sum over all $w_{ki}$ for all firing neurons $k$. In particular, neuron firing spreads through synapses according to the following update rule: neuron $i$ fires if $w_i>T$. Once a neuron fires it stops firing after a pre-determined number of timesteps; in more complex models, a neuron may be blocked from firing again for a certain number of timesteps after firing.
 
-In \cite{valiant_circuits_1994} Valiant describes four modes of learning that result from two dichotomies: one between memorization () and inductive learning (), and the other between supervised () and unsupervised () learning. He describes algorithms that perform all four modes of learning with the neuroidal model. 
+In \cite{valiant_circuits_1994} Valiant describes four modes of learning that result from two dichotomies: one between memorization (storing explicitly provided or logically deduced information) and inductive learning (acquiring knowledge more general than the explicitly provided examples), and the other between supervised (learning from labeled examples) and unsupervised (learning from unlabeled examples) learning. Under these dichotomies, the example-based learning and PAC learning framework that we studied in COS511 fall into supervised inductive learning.
 
-- TODO: MORE INFO ABOUT ALGORITHMS FOR FOUR MODES. PAC LEARNING FOR INDUCTIVE LEARNING\\
-- JOIN: FORMING BOOLEAN CONJUNCTIONS OF ATTRIBUTES (UNSUPERVISED MEM); LINK (SUPERVISED MEM); LEARNING FUNCTIONS (SUPERVISED INDUCTIVE MEM); CORRELATIONAL LEARNING (UNSUPERVISED INDUCTIVE MEM);
+Using the neuroidal model, Valiant presents algorithms that perform all four modes of learning. He constructs algorithms that allow a neuroidal network to recognize an input after a single presentation (unsupervised memorization), associating two items (supervised memorization), learning functions of a particular class from examples (supervised inductive learning), and learning statistical correlations from item presentations (unsupervised inductive learning).
+
+A learning system can use various \underline{peripherals} to perceive and attend to various items, store intermediate information, and organize the longer-scale timing needed in various algorithms. Valiant suggests that the combination of peripherals and of knowledge gained through memorization and inductive learning could allow for higher-level reasoning in a neuroidal model.
 
 \section{Selected Algorithms}\label{sec:selected_algorithms}
-Our study focused on the JOIN and LINK algorithms, which respectively implement unsupervised and supervised memorization (in terms of Valiant's dichotomies) and forming memories and associations (in terms of cognitive functions) \cite{valiant_circuits_1994, papadimitriou_cortical_2015}. In this section, we TODO:DESCRIBE ANALYSES, TODO:OUR IMPLEMENTATION of these functions, and an extension of Valiant's work the proposed a new function.
+Our study focused on the JOIN and LINK algorithms, which respectively implement unsupervised and supervised memorization (in terms of Valiant's dichotomies) and forming memories and associations (in terms of cognitive functions) \cite{valiant_circuits_1994, papadimitriou_cortical_2015}. In this section, we provide a high-level overview of these algorithms and our implementation of these two functions, as well as an extension of Valiant's work the proposed a new function.
 
-We implement the algorithms according to specifics described in \cite{valiant_memorization_2005}.
-- ASSUME BIPARTITE GRAPHS (p550)\\
-- link to code\\
+We assume that networks have two modes, a ``learning" mode in which the network stores some knowledge, and an ``execution" mode in which neurons fire if their total incoming firing falls above some threshold. 
+
+The JOIN algorithm learns a conjunction of two items ``$A$" and ``$B$". During the learning mode the network's representations of $A$ and $B$ fire, and the network creates a new item ``$C$" that represents the conjunction of $A$ and $B$. Then in the execution mode the network's representation of $C$ will fire whenever the network's representations of $A$ and $B$ fire. For instance, if $A$ represents that item ``ice" and $B$ represents the item ``cream" then JOIN($A$,$B$) could form a representation of the item ``ice cream", and seeing ``ice" and ``cream" together would activate the representation of the thought ``ice cream" (rather than the separate thoughts ``ice" and ``cream").
+
+The LINK algorithm learns an association of two items ``$A$" and ``$B$". After storing LINK($A$,$B$) in the learning mode, the network will activate $B$ when $A$ is activated (in the execution mode). For instance, if $A$ represents the idea ``bell" and $B$ represents the idea ``food", then LINK($A$,$B$) would form an association of ``food" with ``bell".
+
+We implement these algorithms according to specifics described in \cite{valiant_memorization_2005} and provide implementation and details in TODO: LINK/DESCRIPTION.
+- visualization of neuron activity?\\
 - simulations\\
 - compare to bounds?\\
 - bounds\\
@@ -68,7 +74,7 @@ Valiant's original model respects constraints posed by the human brain, such as 
 - neurons/synapses/updates\\
 - action potentials (threshold)\\
 - memory (esp associative memory) coactivation, random initialization\\
-- learning and execution\\
+- creation and execution\\
 	- different modes of hippocampus\\
 
 - pattern separation/sparse activation (mtl part 1)\\
