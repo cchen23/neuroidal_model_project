@@ -77,14 +77,19 @@ Current understanding of biological learning also shows similarities to learning
 In addition to similarities in neuroidal model components and algorithms, some implications of this model fit with experimental findings in the human brain. Model parameters (number of neurons in the network, number of neurons per item, probability of connection, and strength of synapses) that allow a neuroidal network to fulfill the bounds we describe in section \ref{sec:selected_algorithms} fit with current knowledge about these parameters in the brain \cite{valiant_memorization_2005, valiant_quantitative_2006}. Neuroscience research has found neurons that respond preferentially to specific stimuli (popularly known as ``grandmother neurons" or ``Jennifer Anniston neurons"), and the neuroidal model explains this phenomenon: the idea that some $r$ neurons in a network of $n$ neurons represent an item implies that there should be some probability $\frac{r}{n}$ of finding a neuron that responds to stimuli that induce a certain thought, if we randomly select neurons \cite{quiroga_invariant_2005, valiant_quantitative_2006}.
 
 \section{Comparison to Neural Networks}
-The neuroidal model shares many structural similarities with neural networks, yet recent literature surrounding this model has been much sparser than than that of neural networks. In this section we compare structural and functional facets of the two models.
+The neuroidal model shares many similarities with neural networks, yet there has been much less recent literature about this model than the amount about neural networks. In this section we compare the two models along two key dimensions: structure and dynamics. 
 
+{\it Structure.} The most salient aspect of any neural network model is the graph structure of the neurons in it. The neuroidal model is a web of unique neurons that overall are guaranteed to have regular properties: a certain degree and a certain synapse strength. The mainstream deep learning model is the opposite in a sense: the neurons are organized in a regular manner, as layers, and then the synapses between layers are free to take on whatever scattered, potentially ugly values they like. It seems that both models have an inductive bias to steer them away from the completely general form of a neural network, it's just that the inductive biases constrain different elements of the graph structure: synapses vs. nodes.
+
+{\it Dynamics.} To do anything useful with a network, one needs to define rules for how its neurons will behave and learn. In the neuroidal model, we define associative operations like JOIN and LINK, which intuitively make sense to us humans and implement structural changes that reflect the learning processes of humans. In the mainstream deep learning model, all notions of interpretability and design are thrown away in favor of stochastic gradient descent; the only compass dictating how each parameter changes is its gradient with respect to some loss function of the overall network output. In a sense this is optimization approach is advantageous, since it seems to work well in practice and there are is rich theory around it. But it lacks the interpretability of the neuroidal model's dynamics, and requires that learning be phrased as prediction with respect to a specific task formulation. Learning as a training process seems more constrained than learning as a network dynamic process, and in this sense the neuroidal model is advantageous. 
+
+{\bf notes.} These are not to be included in the final writeup.
 - similarities in structure\\
 - differences in structure\\
 - benefits\\
-	- more interpretable (explicitly designing algorithms)\\
+- more interpretable (explicitly designing algorithms)\\
 - detriments\\
-	- hard to use as a black box; need explicit algorithms\\
+- hard to use as a black box; need explicit algorithms\\
 
 \section{Conclusion}
 Rather than perform neurobiological studies or behavioral experiments, Valiant proposes a computational approach of building a system that performs the desired behavior using components inspired by biology \cite{valiant_circuits_1994}. With this approach, the neuroidal model differs from work with the brain and artificial neural networks.
