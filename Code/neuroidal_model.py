@@ -5,7 +5,9 @@
 #
 # May 2018
 ####################################################################################################
-
+import matplotlib.pyplot as plt
+from matplotlib.colors import cnames
+import networkx as nx
 import numpy as np
 from enum import IntEnum
 
@@ -199,3 +201,43 @@ class NeuroidalNet:
             p=[1-self.p,self.p]).astype(float)
         if reset_items:
             self.stored_items = {}
+
+    """ Visualizing Network. """
+    def visualize_network(self, color_by="firing", layout=None):
+        G = nx.from_numpy_matrix(self.synapse_strengths)
+
+        # Label and color nodes.
+        labels = {i:"" for i in range(self.num_neurons)}
+        neuron_colors = ["grey" for i in range(self.num_neurons)]
+        color_options = ["sandybrown", "darkcyan", "palevioletred", "mediumseagreen", "lightsteelblue", "teal"]
+        num_color_options = len(color_options)
+        num_items = len(self.stored_items.keys())
+        colors_index = 0
+
+        for item_name, item_neurons in self.stored_items.items():
+            for neuron in item_neurons:
+                labels[neuron] = item_name
+                neuron_colors[neuron] = color_options[colors_index % num_color_options]
+            colors_index += 1
+        neuron_colors = np.array(neuron_colors)
+
+        # Color edges according to weights.
+        edgelist = G.edges(data=True)
+        edge_cmap = plt.cm.Greys
+        edge_vmax = self.k
+        edge_weights = [edge[2]['weight'] for edge in edgelist]
+        if not layout:
+            layout = nx.random_layout(G)
+        if color_by == "firing":
+            on_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.On]
+            off_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.Off]
+            on_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=on_neurons, labels=labels, node_color=neuron_colors[on_neurons], linewidths=2)
+            off_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=off_neurons, labels=labels, node_color=neuron_colors[off_neurons], linewidths=2)
+            if on_nodes:
+                on_nodes.set_edgecolor("yellow")
+            nx.draw_networkx_labels(G, pos=layout, labels=labels)
+            nx.draw_networkx_edges(G, pos=layout, edge_cmap=edge_cmap, edge_color=edge_weights, edge_vmin=0, edge_vmax=edge_vmax)
+        else:
+            nx.draw_networkx(G, labels=labels, pos=layout, node_color=neuron_colors, edge_cmap=edge_cmap, edge_color=edge_weights, edge_vmin=0, edge_vmax=edge_vmax)
+        plt.show()
+        return layout
