@@ -12,7 +12,7 @@ from enum import IntEnum
 class Q(IntEnum):
     """Neuron memories. """
     q1 = 0   # dismissed
-    q2 = 1   # candidate 
+    q2 = 1   # candidate
     q3 = 2   # operational
 
 class QQ(IntEnum):
@@ -24,9 +24,9 @@ class Firing(IntEnum):
     Off = 0
     On = 1
 
-    
+
 class NeuroidalNet:
-    
+
     def __init__(self, n, d, k, r):
         """
         Args:
@@ -60,8 +60,8 @@ class NeuroidalNet:
                                                         replace=False)
         return
 
-    
-    """Memory operations."""
+
+    """Learning memory operations."""
 
     def join(self, itemA_name, itemB_name, itemC_name):
         """Returns nodes with at least total synapse strength k to item nodes."""
@@ -75,6 +75,10 @@ class NeuroidalNet:
         for potential_neuron in potential_neuronsA:
             self.neuron_memories[potential_neuron] = Q.q3
             x = np.count_nonzero(self.synapse_strengths[potential_neuron, itemA_neurons])
+            if x == 0:
+                print("JOIN failed. Insufficient neurons with strong enough connections to A.")
+                self.reset_network()
+                return
             for itemA_neuron in itemA_neurons:
                 if self.synapse_strengths[potential_neuron, itemA_neuron] > 0:
                     self.synapse_memory_states[potential_neuron, itemA_neuron] = QQ.qq2
@@ -91,8 +95,11 @@ class NeuroidalNet:
 
         for neuron in np.where(self.neuron_memories == Q.q3)[0]:
             if neuron in potential_neuronsB:
-                print(neuron)
                 y = np.count_nonzero(self.synapse_strengths[neuron, itemB_neurons])
+                if y == 0:
+                    print("JOIN failed. Insufficient neurons with strong enough connections to B.")
+                    self.reset_network()
+                    return
                 for source_neuron in range(self.num_neurons):
                     # Set synapses to item A
                     if self.synapse_memory_states[neuron, source_neuron] == QQ.qq2:
@@ -124,27 +131,26 @@ class NeuroidalNet:
         itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
         itemA_to_neuron_strengths_sums = np.sum(itemA_to_neuron_strengths, axis=1)
         neurons_activated_by_A = np.where(itemA_to_neuron_strengths_sums >= self.THRESHOLD)[0]
-        
+
         neurons_activated_by_A_to_B_strengths = self.synapse_strengths[:,neurons_activated_by_A]
         neurons_activated_by_A_to_B_strengths_sums = \
             np.sum(neurons_activated_by_A_to_B_strengths, axis=1)
         relay_neurons = np.where(neurons_activated_by_A_to_B_strengths_sums >= self.THRESHOLD)[0]
         n_relay_neurons = len(relay_neurons)
-        
+
         if n_relay_neurons != 0:   # normal case described by Valiant
             for neuron in itemB_neurons:
                 if neuron not in relay_neurons:
                     self.synapse_strengths[neuron, relay_neurons] = self.THRESHOLD / n_relay_neurons
-        else:   # edge case Valiant doesn't specify. I uniformly link A to B
-            n_A_neurons = len(itemA_neurons)
-            for neuron in itemB_neurons:
-                self.synapse_strengths[neuron, itemA_neurons] = \
-                    self.THRESHOLD / n_A_neurons * self.k
-            
+        else:
+            print("LINK failed. Insufficient relay neurons.")
+            self.reset_network()
+            return
+
         return
-    
-    
-    """Execution."""
+
+
+    """Executing Memory Operations."""
 
     def fire_item(self, item_name):
         """Sets neurons associated with item to firing."""
@@ -168,7 +174,7 @@ class NeuroidalNet:
         firing_items = []
         for item_name, item_neurons in self.stored_items.items():
             # Count as firing if > 50% of nodes firing.
-            if len(firing_neurons.intersection(set(item_neurons))) > 0.5 * len(item_neurons): 
+            if len(firing_neurons.intersection(set(item_neurons))) > 0.5 * len(item_neurons):
                 firing_items.append(item_name)
         return firing_items
 
@@ -176,10 +182,12 @@ class NeuroidalNet:
         """Sets all neurons to not firing."""
         self.neuron_firings = np.zeros(self.num_neurons)
 
-    def reset(self):
-        self.neuron_firings = np.zeros(self.num_neurons) 
+    def reset_network(self, reset_synapse_strengths=False):
+        """Resets the network. If reset_synapse_strengths=False, maintains previously learned connections."""
+        self.neuron_firings = np.zeros(self.num_neurons)
         self.neuron_memories = np.zeros(self.num_neurons)
-        self.synapse_strengths = np.random.choice([0,1], (self.num_neurons, self.num_neurons),
-                                                  p=[1-self.p,self.p])
         self.synapse_memory_states = np.zeros([self.num_neurons, self.num_neurons])
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
+        if reset_synapse_strengths:
+            self.synapse_strengths = np.random.choice([0,1], (self.num_neurons, self.num_neurons),
+            p=[1-self.p,self.p])
