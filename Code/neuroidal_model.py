@@ -188,7 +188,7 @@ class NeuroidalNet:
         """Sets all neurons to not firing."""
         self.neuron_firings = np.zeros(self.num_neurons)
 
-    def reset_network(self, reset_synapse_strengths=False):
+    def reset_network(self, reset_synapse_strengths=False, reset_items=False):
         """Resets the network. If reset_synapse_strengths=False, maintains previously learned connections."""
         self.neuron_firings = np.zeros(self.num_neurons)
         self.neuron_memories = np.zeros(self.num_neurons)
@@ -197,3 +197,5 @@ class NeuroidalNet:
         if reset_synapse_strengths:
             self.synapse_strengths = np.random.choice([0,1], (self.num_neurons, self.num_neurons),
             p=[1-self.p,self.p]).astype(float)
+        if reset_items:
+            self.stored_items = {}
