@@ -68,8 +68,8 @@ class NeuroidalNet:
         # Get potential JOIN nodes.
         itemA_neurons = self.stored_items[itemA_name]
         itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
-        itemA_to_neuron_strengths_sums = np.sum(itemA_to_neuron_strengths, axis=1)
-        potential_neuronsA = np.where(itemA_to_neuron_strengths_sums >= self.k)[0]
+        num_itemA_to_neuron_connections = np.count_nonzero(itemA_to_neuron_strengths, axis=1)
+        potential_neuronsA = np.where(num_itemA_to_neuron_connections >= self.k)[0] # C neurons need at least k connections to A.
 
         # Set potential nodes and synapses.
         for potential_neuron in potential_neuronsA:
@@ -88,8 +88,8 @@ class NeuroidalNet:
         # Get potential JOIN nodes.
         itemB_neurons = self.stored_items[itemB_name]
         itemB_to_neuron_strengths = self.synapse_strengths[:,itemB_neurons]
-        itemB_to_neuron_strengths_sums = np.sum(itemB_to_neuron_strengths, axis=1)
-        potential_neuronsB = np.where(itemB_to_neuron_strengths_sums >= self.k)[0]
+        num_itemB_to_neuron_connections = np.count_nonzero(itemB_to_neuron_strengths, axis=1)
+        potential_neuronsB = np.where(num_itemB_to_neuron_connections >= self.k)[0]  # C neurons need at least k connections to B.
 
         join_item_neurons = []
 
