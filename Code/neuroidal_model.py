@@ -69,7 +69,7 @@ class NeuroidalNet:
         itemA_neurons = self.stored_items[itemA_name]
         itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
         num_itemA_to_neuron_connections = np.count_nonzero(itemA_to_neuron_strengths, axis=1)
-        potential_neuronsA = np.where(num_itemA_to_neuron_connections >= self.k)[0] # C neurons need at least k connections to A.
+        potential_neuronsA = set(np.where(num_itemA_to_neuron_connections >= self.k)[0]).difference(set(itemA_neurons)) # C neurons need at least k connections from A, and must be disjoint from A.
 
         # Set potential nodes and synapses.
         for potential_neuron in potential_neuronsA:
@@ -83,13 +83,13 @@ class NeuroidalNet:
                 if self.synapse_strengths[potential_neuron, itemA_neuron] > 0:
                     self.synapse_memory_states[potential_neuron, itemA_neuron] = QQ.qq2
                     self.synapse_memory_values[potential_neuron, itemA_neuron] = \
-                        self.THRESHOLD / float(x)
+                        self.THRESHOLD / (2 * float(x))
 
         # Get potential JOIN nodes.
         itemB_neurons = self.stored_items[itemB_name]
         itemB_to_neuron_strengths = self.synapse_strengths[:,itemB_neurons]
         num_itemB_to_neuron_connections = np.count_nonzero(itemB_to_neuron_strengths, axis=1)
-        potential_neuronsB = np.where(num_itemB_to_neuron_connections >= self.k)[0]  # C neurons need at least k connections to B.
+        potential_neuronsB = set(np.where(num_itemB_to_neuron_connections >= self.k)[0]).difference(set(itemB_neurons))  # C neurons need at least k connections from B, and must be disjoint from B.
 
         join_item_neurons = []
 
@@ -109,7 +109,7 @@ class NeuroidalNet:
                         self.neuron_memories[neuron] = Q.q2
                     # Set synapses to item B
                     elif source_neuron in itemB_neurons:
-                        self.synapse_strengths[neuron, source_neuron] = self.THRESHOLD / float(y)
+                        self.synapse_strengths[neuron, source_neuron] = self.THRESHOLD / (2 * float(y))
                         self.neuron_memories[neuron] = Q.q2
                     # Set other synapses.
                     else:
@@ -142,10 +142,11 @@ class NeuroidalNet:
             for neuron in itemB_neurons:
                 if neuron not in relay_neurons:
                     self.synapse_strengths[neuron, relay_neurons] = self.THRESHOLD / n_relay_neurons
-        else:
-            print("LINK failed. Insufficient relay neurons.")
-            self.reset_network()
-            return
+        else:   # edge case Valiant doesn't specify. I uniformly link A to B
+            n_A_neurons = len(itemA_neurons)
+            for neuron in itemB_neurons:
+                self.synapse_strengths[neuron, itemA_neurons] = \
+                    self.THRESHOLD / n_A_neurons * self.k
 
         return
 
@@ -177,6 +178,11 @@ class NeuroidalNet:
             if len(firing_neurons.intersection(set(item_neurons))) > 0.5 * len(item_neurons):
                 firing_items.append(item_name)
         return firing_items
+
+    def get_firing_neurons(self):
+        """Returns a list of neuron firing."""
+        firing_neurons = set(np.where(self.neuron_firings == Firing.On)[0])
+        return firing_neurons
 
     def turn_off_all_firing(self):
         """Sets all neurons to not firing."""
