@@ -36,6 +36,7 @@ class NeuroidalNet:
             r: number of neurons per item
         """
         self.THRESHOLD = 100.0
+        self.EPSILON = self.THRESHOLD / 10**10
         self.num_neurons = n
         self.degree = d
         self.k = k
@@ -49,7 +50,7 @@ class NeuroidalNet:
         self.neuron_memories = np.zeros(self.num_neurons)
 
         # Initialize synapses.
-        self.synapse_strengths = np.random.choice([0,1], (self.num_neurons, self.num_neurons),
+        self.synapse_strengths = np.random.choice([0.0,1.0], (self.num_neurons, self.num_neurons),
                                                   p=[1-self.p,self.p])
         self.synapse_memory_states = np.zeros([self.num_neurons, self.num_neurons])
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
@@ -129,25 +130,24 @@ class NeuroidalNet:
         itemB_neurons = self.stored_items[itemB_name]
         itemA_neurons = self.stored_items[itemA_name]
         itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
-        itemA_to_neuron_strengths_sums = np.sum(itemA_to_neuron_strengths, axis=1)
-        neurons_activated_by_A = np.where(itemA_to_neuron_strengths_sums >= self.THRESHOLD)[0]
+        num_itemA_to_neuron_connections = np.count_nonzero(itemA_to_neuron_strengths, axis=1)
+        potential_relay_neurons = set(np.where(num_itemA_to_neuron_connections >= self.k)[0]).difference(set(itemA_neurons)) # Relay neurons need at least k connections from A, and must be disjoint from A.
 
-        neurons_activated_by_A_to_B_strengths = self.synapse_strengths[:,neurons_activated_by_A]
-        neurons_activated_by_A_to_B_strengths_sums = \
-            np.sum(neurons_activated_by_A_to_B_strengths, axis=1)
-        relay_neurons = np.where(neurons_activated_by_A_to_B_strengths_sums >= self.THRESHOLD)[0]
+        neurons_connectedtoB = set(np.where(np.count_nonzero(self.synapse_strengths[itemB_neurons,:], axis=0) > 0)[0]).difference(set(itemB_neurons)) # Relay neurons must be connected to B, and must be disjoint from B.
+        relay_neurons = potential_relay_neurons.intersection(neurons_connectedtoB)
         n_relay_neurons = len(relay_neurons)
 
-        if n_relay_neurons != 0:   # normal case described by Valiant
+        if n_relay_neurons < self.k:   # Need at least k relay neurons.
+            print("LINK failed. Insufficient relay neurons.")
+            self.reset_network()
+            return
+        else:
+            for neuron in relay_neurons:
+                connected_neuronsA = list(set(np.where(self.synapse_strengths[neuron,:] > 0)[0]).intersection(set(itemA_neurons)))
+                self.synapse_strengths[neuron, connected_neuronsA] = self.THRESHOLD / float(len(connected_neuronsA))
             for neuron in itemB_neurons:
-                if neuron not in relay_neurons:
-                    self.synapse_strengths[neuron, relay_neurons] = self.THRESHOLD / n_relay_neurons
-        else:   # edge case Valiant doesn't specify. I uniformly link A to B
-            n_A_neurons = len(itemA_neurons)
-            for neuron in itemB_neurons:
-                self.synapse_strengths[neuron, itemA_neurons] = \
-                    self.THRESHOLD / n_A_neurons * self.k
-
+                connected_neuronsrelay = list(set(np.where(self.synapse_strengths[neuron,:] > 0)[0]).intersection(set(relay_neurons)))
+                self.synapse_strengths[neuron, connected_neuronsrelay] = self.THRESHOLD / float(len(connected_neuronsrelay))
         return
 
 
@@ -165,7 +165,7 @@ class NeuroidalNet:
         new_neuron_firings = np.zeros_like(self.neuron_firings)
         for neuron in range(self.num_neurons):
             weighted_input = sum(self.neuron_firings * self.synapse_strengths[neuron,:])
-            if weighted_input >= self.THRESHOLD:
+            if weighted_input >= self.THRESHOLD - self.EPSILON:
                 new_neuron_firings[neuron] = Firing.On
         self.neuron_firings = new_neuron_firings
 
@@ -196,4 +196,4 @@ class NeuroidalNet:
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
         if reset_synapse_strengths:
             self.synapse_strengths = np.random.choice([0,1], (self.num_neurons, self.num_neurons),
-            p=[1-self.p,self.p])
+            p=[1-self.p,self.p]).astype(float)
