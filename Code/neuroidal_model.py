@@ -239,8 +239,8 @@ class NeuroidalNet:
             layout = nx.random_layout(G)
         on_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.On]
         off_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.Off]
-        on_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=on_neurons, labels=labels, node_color=neuron_colors[on_neurons], linewidths=2)
         off_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=off_neurons, labels=labels, node_color=neuron_colors[off_neurons], linewidths=2)
+        on_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=on_neurons, labels=labels, node_color=neuron_colors[on_neurons], linewidths=2)
         if on_nodes:
             on_nodes.set_edgecolor("yellow")
         nx.draw_networkx_labels(G, pos=layout, labels=labels)
