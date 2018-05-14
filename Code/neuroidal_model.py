@@ -75,13 +75,13 @@ class NeuroidalNet:
         potential_neuronsA = set(np.where(num_itemA_to_neuron_connections >= self.k)[0]).difference(set(itemA_neurons)) # C neurons need at least k connections from A, and must be disjoint from A.
 
         # Set potential nodes and synapses.
+        if len(potential_neuronsA) == 0:
+            print("JOIN failed. Insufficient neurons with strong enough connections to A.")
+            self.reset_network()
+            return
         for potential_neuron in potential_neuronsA:
             self.neuron_memories[potential_neuron] = Q.q3
             x = np.count_nonzero(self.synapse_strengths[potential_neuron, itemA_neurons])
-            if x == 0:
-                print("JOIN failed. Insufficient neurons with strong enough connections to A.")
-                self.reset_network()
-                return
             for itemA_neuron in itemA_neurons:
                 if self.synapse_strengths[potential_neuron, itemA_neuron] > 0:
                     self.synapse_memory_states[potential_neuron, itemA_neuron] = QQ.qq2
@@ -96,13 +96,13 @@ class NeuroidalNet:
 
         join_item_neurons = []
 
+        if len(potential_neuronsB) == 0:
+            print("JOIN failed. Insufficient neurons with strong enough connections to B.")
+            self.reset_network()
+            return
         for neuron in np.where(self.neuron_memories == Q.q3)[0]:
             if neuron in potential_neuronsB:
                 y = np.count_nonzero(self.synapse_strengths[neuron, itemB_neurons])
-                if y == 0:
-                    print("JOIN failed. Insufficient neurons with strong enough connections to B.")
-                    self.reset_network()
-                    return
                 for source_neuron in range(self.num_neurons):
                     # Set synapses to item A
                     if self.synapse_memory_states[neuron, source_neuron] == QQ.qq2:
@@ -224,7 +224,7 @@ class NeuroidalNet:
         # Color edges according to weights.
         edgelist = G.edges(data=True)
         edge_cmap = plt.cm.Greys
-        edge_vmax = self.k
+        edge_vmax = self.THRESHOLD / self.k / 10
         edge_weights = [edge[2]['weight'] for edge in edgelist]
         if not layout:
             layout = nx.random_layout(G)
