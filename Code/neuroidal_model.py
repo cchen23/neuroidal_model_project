@@ -52,7 +52,7 @@ class NeuroidalNet:
         self.neuron_memories = np.zeros(self.num_neurons)
 
         # Initialize synapses.
-        self.synapse_strengths = np.random.choice([0.0,1.0], (self.num_neurons, self.num_neurons),
+        self.synapse_strengths = np.random.choice([0.0, self.THRESHOLD / self.degree], (self.num_neurons, self.num_neurons),
                                                   p=[1-self.p,self.p])
         self.synapse_memory_states = np.zeros([self.num_neurons, self.num_neurons])
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
@@ -65,14 +65,20 @@ class NeuroidalNet:
 
 
     """Learning memory operations."""
+    def get_potentialneurons(self, item_neurons):
+        """Returns indices of neurons with at least k connections to item_neurons.
+        Does not include neurons in item_neurons.
+        """
+        item_to_neuron_strengths = self.synapse_strengths[:,item_neurons]
+        num_item_to_neuron_connections = np.count_nonzero(item_to_neuron_strengths, axis=1)
+        potential_neurons = set(np.where(num_item_to_neuron_connections >= self.k)[0]).difference(set(item_neurons))
+        return potential_neurons
 
     def join(self, itemA_name, itemB_name, itemC_name):
         """Returns nodes with at least total synapse strength k to item nodes."""
         # Get potential JOIN nodes.
         itemA_neurons = self.stored_items[itemA_name]
-        itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
-        num_itemA_to_neuron_connections = np.count_nonzero(itemA_to_neuron_strengths, axis=1)
-        potential_neuronsA = set(np.where(num_itemA_to_neuron_connections >= self.k)[0]).difference(set(itemA_neurons)) # C neurons need at least k connections from A, and must be disjoint from A.
+        potential_neuronsA = self.get_potentialneurons(itemA_neurons)
 
         # Set potential nodes and synapses.
         if len(potential_neuronsA) == 0:
@@ -90,10 +96,7 @@ class NeuroidalNet:
 
         # Get potential JOIN nodes.
         itemB_neurons = self.stored_items[itemB_name]
-        itemB_to_neuron_strengths = self.synapse_strengths[:,itemB_neurons]
-        num_itemB_to_neuron_connections = np.count_nonzero(itemB_to_neuron_strengths, axis=1)
-        potential_neuronsB = set(np.where(num_itemB_to_neuron_connections >= self.k)[0]).difference(set(itemB_neurons))  # C neurons need at least k connections from B, and must be disjoint from B.
-
+        potential_neuronsB = self.get_potentialneurons(itemB_neurons)
         join_item_neurons = []
 
         if len(potential_neuronsB) == 0:
@@ -131,10 +134,7 @@ class NeuroidalNet:
 
         itemB_neurons = self.stored_items[itemB_name]
         itemA_neurons = self.stored_items[itemA_name]
-        itemA_to_neuron_strengths = self.synapse_strengths[:,itemA_neurons]
-        num_itemA_to_neuron_connections = np.count_nonzero(itemA_to_neuron_strengths, axis=1)
-        potential_relay_neurons = set(np.where(num_itemA_to_neuron_connections >= self.k)[0]).difference(set(itemA_neurons)) # Relay neurons need at least k connections from A, and must be disjoint from A.
-
+        potential_relay_neurons = self.get_potentialneurons(itemA_neurons)
         neurons_connectedtoB = set(np.where(np.count_nonzero(self.synapse_strengths[itemB_neurons,:], axis=0) > 0)[0]).difference(set(itemB_neurons)) # Relay neurons must be connected to B, and must be disjoint from B.
         relay_neurons = potential_relay_neurons.intersection(neurons_connectedtoB)
         n_relay_neurons = len(relay_neurons)
