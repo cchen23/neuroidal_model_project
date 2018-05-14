@@ -3,7 +3,7 @@ import numpy as np
 
 savepath = "../Figures/"
 n = 30
-d = 14
+d = 15
 k = 3
 r = 5
 layout={i:np.random.rand(2) for i in range(n)}
@@ -56,6 +56,7 @@ layout={i:np.random.rand(2) for i in range(n)}
 net.reset_network(reset_synapse_strengths=True, reset_items=True)
 net.create_item("A", disjoint=True)
 net.create_item("B", disjoint=True)
+net.visualize_network(layout=layout, savename=savepath+"beforeLINK")
 net.link('A', 'B')
 net.visualize_network(layout=layout, savename=savepath+"afterLINK")
 net.fire_item('A')
