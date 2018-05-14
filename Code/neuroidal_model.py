@@ -52,15 +52,21 @@ class NeuroidalNet:
         self.neuron_memories = np.zeros(self.num_neurons)
 
         # Initialize synapses.
-        self.synapse_strengths = np.random.choice([0.0, self.THRESHOLD / self.degree], (self.num_neurons, self.num_neurons),
+        self.synapse_strengths = np.random.choice([0.0, 1.0], (self.num_neurons, self.num_neurons),
                                                   p=[1-self.p,self.p])
         self.synapse_memory_states = np.zeros([self.num_neurons, self.num_neurons])
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
 
-    def create_item(self, item_name):
+    def create_item(self, item_name, disjoint=False):
         """Randomly selects r neurons to represent an item."""
-        self.stored_items[item_name] = np.random.choice(range(self.num_neurons), (self.r),
-                                                        replace=False)
+        if disjoint:
+            neuron_choices = set(range(self.num_neurons))
+            for item, neurons in self.stored_items.items():
+                neuron_choices.difference_update(set(neurons))
+            self.stored_items[item_name] = np.random.choice(list(neuron_choices), self.r, replace=False)
+        else:
+            self.stored_items[item_name] = np.random.choice(range(self.num_neurons), (self.r),
+            replace=False)
         return
 
 
@@ -149,7 +155,9 @@ class NeuroidalNet:
                 self.synapse_strengths[neuron, connected_neuronsA] = self.THRESHOLD / float(len(connected_neuronsA))
             for neuron in itemB_neurons:
                 connected_neuronsrelay = list(set(np.where(self.synapse_strengths[neuron,:] > 0)[0]).intersection(set(relay_neurons)))
-                self.synapse_strengths[neuron, connected_neuronsrelay] = self.THRESHOLD / float(len(connected_neuronsrelay))
+                num_connectedneurons = len(connected_neuronsrelay)
+                if num_connectedneurons > 0:
+                    self.synapse_strengths[neuron, connected_neuronsrelay] = self.THRESHOLD / float(num_connectedneurons)
         return
 
 
@@ -203,7 +211,7 @@ class NeuroidalNet:
             self.stored_items = {}
 
     """ Visualizing Network. """
-    def visualize_network(self, color_by="firing", layout=None):
+    def visualize_network(self, color_by="firing", layout=None, savename=None):
         G = nx.from_numpy_matrix(self.synapse_strengths)
 
         # Label and color nodes.
@@ -228,16 +236,15 @@ class NeuroidalNet:
         edge_weights = [edge[2]['weight'] for edge in edgelist]
         if not layout:
             layout = nx.random_layout(G)
-        if color_by == "firing":
-            on_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.On]
-            off_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.Off]
-            on_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=on_neurons, labels=labels, node_color=neuron_colors[on_neurons], linewidths=2)
-            off_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=off_neurons, labels=labels, node_color=neuron_colors[off_neurons], linewidths=2)
-            if on_nodes:
-                on_nodes.set_edgecolor("yellow")
-            nx.draw_networkx_labels(G, pos=layout, labels=labels)
-            nx.draw_networkx_edges(G, pos=layout, edge_cmap=edge_cmap, edge_color=edge_weights, edge_vmin=0, edge_vmax=edge_vmax)
-        else:
-            nx.draw_networkx(G, labels=labels, pos=layout, node_color=neuron_colors, edge_cmap=edge_cmap, edge_color=edge_weights, edge_vmin=0, edge_vmax=edge_vmax)
+        on_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.On]
+        off_neurons = [neuron for neuron in range(self.num_neurons) if self.neuron_firings[neuron] == Firing.Off]
+        on_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=on_neurons, labels=labels, node_color=neuron_colors[on_neurons], linewidths=2)
+        off_nodes = nx.draw_networkx_nodes(G, pos=layout, nodelist=off_neurons, labels=labels, node_color=neuron_colors[off_neurons], linewidths=2)
+        if on_nodes:
+            on_nodes.set_edgecolor("yellow")
+        nx.draw_networkx_labels(G, pos=layout, labels=labels)
+        nx.draw_networkx_edges(G, pos=layout, edge_cmap=edge_cmap, edge_color=edge_weights, edge_vmin=0, edge_vmax=edge_vmax)
+        plt.axis('off')
+        if savename:
+            plt.savefig(savename)
         plt.show()
-        return layout
