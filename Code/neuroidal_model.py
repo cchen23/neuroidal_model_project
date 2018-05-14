@@ -48,12 +48,13 @@ class NeuroidalNet:
         self.stored_items = {}
 
         # Initialize neurons.
-        self.neuron_firings = np.zeros(self.num_neurons)   # 0 if not firing, 1 if firing
+        self.neuron_firings = np.zeros(self.num_neurons)   # 0 if not firing, 1 if firing.
         self.neuron_memories = np.zeros(self.num_neurons)
 
         # Initialize synapses.
         self.synapse_strengths = np.random.choice([0.0, 1.0], (self.num_neurons, self.num_neurons),
                                                   p=[1-self.p,self.p])
+        np.fill_diagonal(self.synapse_strengths, 0) # Initialize without self loops.
         self.synapse_memory_states = np.zeros([self.num_neurons, self.num_neurons])
         self.synapse_memory_values = np.empty([self.num_neurons, self.num_neurons])
 
